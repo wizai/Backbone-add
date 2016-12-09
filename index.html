@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>librery</title>
+    <meta charset="utf-8" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
+    <script type="text/template" id="add_template">
+        <label>Ajouter livre + auteur</label>
+        <input type="text" id="add_livre" />
+        <input type="text" id="add_auteur" />
+        <input type="button" id="search_button" value="Add" />
+    </script>
+
+    <div id="add_container"></div>
+
+    <script>
+        var AddModel = Backbone.Model.extend
+        (
+                {
+                    defaults :
+                    {
+                        livre: "",
+                        auteur: ""
+                    }
+                }
+        );
+        /* ContactCollection [ new Contact(), new Contact() ]  */
+        var LibreryCollection = Backbone.Collection.extend
+        (
+                {
+                    model : AddModel
+                }
+        );
+        //Données mockups correspondant à la liste des librery
+        var librery;
+
+        AddView = Backbone.View.extend
+        ( {
+            // Construtor-like
+            initialize: function ()
+            {
+                console.log( "View !" );
+                this.render();
+            },
+            render: function()
+            {
+                // Compile le template
+                var template = _.template( $("#add_template").html(), {} );
+                // Charge dans "el" via une objet jQuery mis en cache par Backbone
+                this.$el.html( template );
+            },
+            events:
+            {
+                "click input[type=button]": "doAdd"
+            },
+            doAdd: function( event )
+            {
+                // Le bouton cliqué est référencé dans event.currentTarget
+                ( function ( $, Backbone )
+                {
+                    $( function ()
+                            {
+                                var main = function()
+                                {
+                                    librery = new LibreryCollection();
+                                    librery.add( new AddModel( {livre:$( "#add_livre" ).val(),auteur:$( "#add_auteur" ).val() } ) );
+                                    // Annule le message de chargement
+                                    $( "#loading").remove();
+                                    // Renseigne les éléments de la liste
+                                    var $contact_list = $( "#contact_list" );
+                                    librery.each
+                                    (
+                                            function( contact )
+                                            {
+                                                $contact_list.append
+                                                (
+                                                        "<li>"+
+                                                        contact.get( "auteur" ) + " : "+ contact.get( "livre" ) +
+                                                        "</a>" +
+                                                        "</li>"
+                                                );
+                                            }
+                                    );
+                                };
+                                $( "body" ).append( "<h1 id='loading'>Please wait</h1>" );
+                                // Active une pseudo requête async HTTP
+                                setTimeout( main, 500 );
+                            }
+                    );
+                })(jQuery, Backbone);
+            }
+        } );
+        var search_view = new AddView( { el: $("#add_container") } );
+    </script>
+</head>
+<body>
+<ul id="contact_list">
+</ul>
+</body>
+</html>
